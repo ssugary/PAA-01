@@ -144,6 +144,14 @@ ex:
 
 As instâncias utilizadas foram retiradas das instâncias de **Tsiligirides** (1984) e **Chao et al** (1996).
 
+Após isso, rode via linha de comando da seguinte forma:
+
+```bash
+./build/OPTests <caminho_da_instância> <arquivo_de_saída>
+```
+
+Caso o parâmetro <arquivo_de_saída> esteja vazio, o programa criará um arquivo `teste.txt` com as informações obtidas além dos resultados no terminal. 
+
 ## Licence
 
 Copyright (c) 2026 ssugary
