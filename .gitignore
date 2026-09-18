@@ -1,0 +1,4 @@
+*.txt
+.cache/
+build/
+tests/
