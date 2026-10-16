@@ -15,21 +15,23 @@ set(CMAKE_BUILD_TYPE Debug) # just for gdb
 set(CMAKE_BUILD_TYPE Release) # for fastier math calcs
 set(CMAKE_CXX_FLAGS_RELEASE "-O3 -march=native -flto -ffast-math")
 
-file(GLOB_RECURSE SRC_FILES
-    ${CMAKE_SOURCE_DIR}/src/*.cpp
-)
+
 
 add_executable(${PROJECT_NAME}
-    ${SRC_FILES}
-    ${LIB_SOURCES}
+    ${CMAKE_SOURCE_DIR}/src/main.cpp 
+    ${CMAKE_SOURCE_DIR}/src/Parser.cpp 
+    ${CMAKE_SOURCE_DIR}/src/Population.cpp
 )
+
 
 target_include_directories(${PROJECT_NAME} PRIVATE
     ${CMAKE_SOURCE_DIR}/src
-    ${CMAKE_SOURCE_DIR}/src/core
-    ${CMAKE_SOURCE_DIR}/src/include
 )
 
+
+add_executable(InstanceGen
+    src/InstanceGen/InstanceGenerator.cpp
+)
 target_compile_options(${PROJECT_NAME} PRIVATE
     -Wall -Wextra -Wpedantic 
 )                          

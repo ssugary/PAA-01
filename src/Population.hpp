@@ -20,31 +20,30 @@ class Population
         std::size_t cityQnt;
         
         const int startNode{};
-        const int endNode{};
-        const double TMax{};
-        const std::vector<std::vector<double>>* paths{nullptr};
-        const std::vector<double>* profits{nullptr};
+        const std::vector<std::vector<double>> paths{};
+        const std::vector<double> profits{};
         std::mt19937 rng{std::random_device{}()};
         
         void calcScore(Individual& ind) const;   
         
     public:
+        
+        const double TMax{};
+        const int endNode{};
 
-        Population(std::vector<std::vector<double>>*, std::vector<double>*, double, int, int);
+        Population(std::vector<std::vector<double>>, std::vector<double>, std::vector<int>, double, int, int);
 
         /*Heuristicas de Melhoria*/
         Individual opt2(const Individual&);
-        Individual opt3(const Individual&);
-        Individual opt4BI(const Individual&);
-        Individual opt4FI(const Individual&);
         Individual ruin(const Individual&);
         Individual recreate(const Individual&);
         
         /*Heuristicas Construtivas*/
         Individual generateGrasp();
-        Individual generateRandom();
 
         std::vector<Individual> pop;
+        const std::vector<int> types{};
+        
 };
 
 

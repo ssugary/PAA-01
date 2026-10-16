@@ -7,11 +7,12 @@
 
 std::string Parser::output;
 
+
 Population Parser::parse(int argc, char* argv[])
 {
     std::string filename;
     if(argc < 2)
-        filename = "tests/Tsiligirides1/tsiligirides_problem_1_budget_85.txt";
+        filename = "tests/Instance1/intance1_100.txt";
     else  
         filename = std::string(argv[1]);
 
@@ -33,16 +34,16 @@ Population Parser::parse(int argc, char* argv[])
     std::string tmax;
     ss >> tmax;
 
-    std::vector<std::tuple<double, double, double>> vertices;
+    std::vector<std::tuple<double, double, int>> vertices;
     
 
     while(getline(ifs, line))
     {
         std::stringstream ssl{ line };
 
-        std::string x, y, point;
-        if(ssl >> x >> y >> point) 
-            vertices.push_back(std::tuple(std::stod(x), std::stod(y), std::stod(point)));
+        std::string diff, profit, type;
+        if(ssl >> diff >> profit >> type) 
+            vertices.push_back(std::tuple(std::stod(diff), std::stod(profit), std::stoi(type)));
         
     }
 
@@ -51,110 +52,42 @@ Population Parser::parse(int argc, char* argv[])
     
     std::size_t N = vertices.size();
 
-    auto profits = new std::vector<double>(N);
-    auto dist = new std::vector<std::vector<double>>(N, std::vector<double>(N, 0.0));
+    std::vector<double> profits(N);
+    std::vector<int> types(N);
+    std::vector<std::vector<double>> dist(N, std::vector<double>(N, 0.0));
 
-    for(std::size_t i{0}; i < N; ++i)
-        (*profits)[i] = std::get<2>(vertices[i]);
+    for(std::size_t i{0}; i < N; ++i) 
+    {
+        profits[i] = std::get<1>(vertices[i]);
+        types[i] = std::get<2>(vertices[i]);
+    }
 
-    for(std::size_t i{0}; i < N; ++i)
-        for(std::size_t j{0}; j < N; ++j)
+    for(std::size_t i{0}; i < N; ++i) 
+        for(std::size_t j{0}; j < N; ++j) 
         {
-            double dx = std::get<0>(vertices[i]) - std::get<0>(vertices[j]);
-            double dy = std::get<1>(vertices[i]) - std::get<1>(vertices[j]);
-            (*dist)[i][j] = std::sqrt(dx*dx + dy*dy);
+            if (i == j) 
+            {
+                dist[i][j] = 0.;
+                continue;
+            }
+
+            double baseDiff = std::get<0>(vertices[j]);
+            double diffJump = std::abs(std::get<0>(vertices[j]) - std::get<0>(vertices[i]));
+            
+            double flowPen = 0.0;
+            int typeA = std::get<2>(vertices[i]);
+            int typeB = std::get<2>(vertices[j]);
+
+            if(typeA == typeB && (typeA == 0 || typeA == 1 || typeA == 6)) flowPen = 100.0; 
+            if(typeA == 0 && typeB == 1) flowPen = 500.0; 
+            if(typeA == 0 && typeB == 3) flowPen = 150.0; 
+            if(typeA == 3 && typeB == 5) flowPen = -10.0; 
+
+            double cost = baseDiff + (LAMBDA * diffJump) + flowPen;
+            dist[i][j] = std::max(0.1, cost);
         }
-
-    return Population(dist, profits, std::stod(tmax), 0, dist->size() - 1);
-}
-
-void Parser::exportResults(const std::vector<std::vector<Result>>& res, const std::vector<double>& averageTimes, const std::unordered_map<int, std::string>& names)
-{
-    std::ofstream ofs(output);
-
-    ofs << std::format("{:<38}   {:<8}   {:<8}   {:<9}   {:<11}   {:<10}\n", 
-                            "Algorithm", 
-                            "Median", 
-                            "Max", 
-                            "Delta Fit", 
-                            "Average Time", 
-                            "Overhead");
-
-    Result graspMedian = res[0][res[0].size() / 2];
-
-    for(std::size_t i{0}; i < names.size(); ++i)
-    {
-        Result median = res[i][res[i].size() / 2];
-
-        ofs << std::format("{:<38} | {:<8.1f} | {:<8.1f} | {:<9} | {:<8.3f}ms | {:<10}\n",
-                                names.at(i), 
-                                median.ind.fitness,
-                                res[i].back().ind.fitness, 
-                                calc::formatRelativeFitness(median.ind.fitness, graspMedian.ind.fitness),
-                                averageTimes[i], 
-                                calc::formatRelativeTime(averageTimes[i], averageTimes[2])
-                            );
-    }
-
     
 
-    ofs.close();
+    return Population(dist, profits, types, std::stod(tmax), 0, N - 1);
 }
 
-void Parser::printResults(const std::vector<std::vector<Result>>& res, const std::vector<double>& averageTimes, const std::unordered_map<int, std::string>& names)
-{
-    std::cout << std::format("{:<38} | {:<8} | {:<8} | {:<9} | {:<11} | {:<10}\n", 
-        "Algorithm", "Median", "Max", "Delta Fit", "Average Time", "Overhead");
-    std::cout << std::string(98, '-') << '\n';
-
-    Result graspMedian = res[0][res[0].size() / 2];
-    
-    for(std::size_t i{0}; i < res.size(); ++i)
-    {
-        auto& v = res[i];
-        
-        Result median = v[v.size() / 2];
-        
-        std::cout << std::format("{:<38} | {:<8.1f} | {:<8.1f} | {:<9} | {:<8.3f}ms | {:<10}\n",
-                                names.at(i), median.ind.fitness,
-                                res[i].back().ind.fitness, 
-                                calc::formatRelativeFitness(median.ind.fitness, graspMedian.ind.fitness),
-                                averageTimes[i], 
-                                calc::formatRelativeTime(averageTimes[i], averageTimes[2])
-                            );
-
-    }
-}
-
-namespace calc
-{
-
-    double relativeTime(double indTime, double targetTime)
-    {
-        if(indTime <= 1e-3)
-            return 0.;
-
-        if(targetTime <= 1e-8) 
-            return 1.;
-
-        return indTime / targetTime;
-    }
-
-    double relativeFitness(double indFit, double graspFit)
-    {
-        if(graspFit <= 1e-8 || indFit <= 1e-8) 
-            return 0.;
-
-        return ((indFit - graspFit) / graspFit) * 100.; ;
-    }
-
-    std::string formatRelativeTime(double indTime, double targetTime)
-    {
-        return std::format("{:.2f}x", calc::relativeTime(indTime, targetTime));
-    }
-    std::string formatRelativeFitness(double indFit, double graspFit)
-    {
-        return std::format("{:+0.2f}%", calc::relativeFitness(indFit, graspFit));
-    }
-
-};
