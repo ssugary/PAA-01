@@ -15,10 +15,10 @@ const double LAMBDA{3.};
 class Parser
 {
     private:
-        
-        static std::string output;
-
+    
+    
     public:
+        static std::string output;
         static Population parse(int argc, char* argv[]);
 };
     

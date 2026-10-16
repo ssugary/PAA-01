@@ -185,7 +185,7 @@ int main(int argc, char* argv[])
     if(argc < 5)
     {
         std::cerr << "Uso: " << argv[0]
-                  << " <n_salas> <seed> <fator_orcamento> <saida.txt> [largura] [altura] [dist_min]\n";
+                  << " <n_salas> <seed> <fator_orcamento> <saida.txt> <TMax_fixo>\n";
         return 1;
     }
 

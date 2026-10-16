@@ -17,38 +17,31 @@ int main(int argc, char* argv[])
 
     
     auto start = std::chrono::high_resolution_clock::now();
+
     for(int i = 0; i < 30; ++i) 
-        gaPop.pop.push_back(gaPop.opt2(gaPop.recreate(gaPop.ruin(gaPop.opt2(gaPop.generateGrasp())))));
+        graspRRPop.push_back(gaPop.opt2(gaPop.recreate(gaPop.ruin(gaPop.opt2(gaPop.generateGrasp())))));
+
     auto end = std::chrono::high_resolution_clock::now();
 
-    // double timeMs = std::chrono::duration<double, std::milli>(end - start).count();
+    double timeMs = std::chrono::duration<double, std::milli>(end - start).count();
 
-    // double avgIterTimeMs = timeMs / 30.;
+    double avgIterTimeMs = timeMs / 30.;
 
-    // std::sort(graspPop.begin(), graspPop.end(), [](const Individual& a, const Individual& b) {
-    //     return a.fitness < b.fitness;
-    // });
-    // std::sort(graspRRPop.begin(), graspRRPop.end(), [](const Individual& a, const Individual& b) {
-    //     return a.fitness < b.fitness;
-    // });
+    std::sort(graspPop.begin(), graspPop.end(), [](const Individual& a, const Individual& b) {
+        return a.fitness < b.fitness;
+    });
+    std::sort(graspRRPop.begin(), graspRRPop.end(), [](const Individual& a, const Individual& b) {
+        return a.fitness < b.fitness;
+    });
 
-    // auto grasp = graspPop[graspPop.size() / 2];
-    // auto median = graspRRPop[graspRRPop.size() / 2];
-    // double gainPercent = ((median.fitness - grasp.fitness) / (grasp.fitness <= 0 ? 1.0 : grasp.fitness)) * 100.0;
+    auto grasp = graspPop[graspPop.size() / 2];
+    auto median = graspRRPop[graspRRPop.size() / 2];
+    double gainPercent = ((median.fitness - grasp.fitness) / (grasp.fitness <= 0. ? 1. : grasp.fitness)) * 100.;
 
-    // std::ofstream ofs{"temp.txt"};
-
-    // ofs << gaPop.TMax << ' ' << grasp.fitness << ' ' << median.fitness << ' ' << gainPercent << "% " << avgIterTimeMs << "ms\n" ;
-    // ofs.close();
-
-    DungeonRasterizer rasterizer(35, 35);
-    
-    rasterizer.rasterizeGoldenPath(gaPop.pop.back().path, gaPop.types, gaPop.endNode);
-    rasterizer.attachSideRooms(gaPop.types, gaPop.types.size());
-    
-    rasterizer.exportJSON("dungeon_map.json");
-    rasterizer.exportHTML("dungeon.html");
-
+    std::ofstream ofs{Parser::output};
+    ofs << "N (Salas)	TMax Médio	GRASP Médio	Final Médio	Ganho Médio (%)	Tempo Médio (ms)\n";
+    ofs << gaPop.endNode + 1 << ' ' << gaPop.TMax << ' ' << grasp.fitness << ' ' << median.fitness << ' ' << gainPercent << "% " << avgIterTimeMs << "ms\n" ;
+    ofs.close();
 
 
     return 0;

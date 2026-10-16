@@ -12,7 +12,7 @@ Population Parser::parse(int argc, char* argv[])
 {
     std::string filename;
     if(argc < 2)
-        filename = "tests/Instance1/intance1_100.txt";
+        filename = "Instances/inst_N20_B1.5_S1.txt";
     else  
         filename = std::string(argv[1]);
 
